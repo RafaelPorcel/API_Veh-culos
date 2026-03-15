@@ -1,11 +1,15 @@
 package com.example.api_vehiculos.service;
 
 import com.example.api_vehiculos.model.*;
+import org.apache.logging.log4j.util.PropertySource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.util.comparator.Comparators;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VehiculoService {
@@ -41,8 +45,44 @@ public class VehiculoService {
             new Camion(20L, "Iveco", "S-Way", 105000.0, 2, 2000.0)
     ));
 
-    public List<Vehiculo> listarVehiculos(){
-        return this.inventario;
+    public List<Vehiculo> listarVehiculos() {
+        return this.inventario.stream()
+                .sorted(Comparator.comparing(Vehiculo::getId))
+                .collect(Collectors.toList());
+    }
+
+    public Optional<Vehiculo> obtenerVehiculoPorId(Long id) {
+        for (Vehiculo v : this.inventario) {
+            if (id == v.getId()) {
+                return Optional.ofNullable(v);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /*public Boolean insertarVehiculo(Vehiculo vehiculo) {
+        for (Vehiculo v : this.inventario) {
+            if (v.getId() == vehiculo.getId()){
+                return false;
+            }else {
+                this.inventario.add(vehiculo);
+            }
+        }return true;
+    }*/
+
+    public Boolean insertarVehiculo(Vehiculo vehiculo) {
+        // 1. Recorremos toda la lista solo para comprobar
+        for (Vehiculo v : this.inventario) {
+            if (v.getId() == vehiculo.getId()) {
+                // Si encontramos un ID igual, paramos todo y devolvemos false
+                return false;
+            }
+        }
+
+        // 2. Si el código llega hasta aquí, significa que el bucle terminó
+        // y no encontró ningún ID repetido. ¡Ahora sí podemos añadirlo!
+        this.inventario.add(vehiculo);
+        return true;
     }
 
 
